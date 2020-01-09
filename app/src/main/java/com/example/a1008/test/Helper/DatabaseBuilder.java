@@ -1,14 +1,9 @@
 package com.example.a1008.test.Helper;
 
-import android.util.Log;
-
 import com.example.a1008.test.Tasks.QueryTask;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 public class DatabaseBuilder {
 
@@ -18,10 +13,12 @@ public class DatabaseBuilder {
     public final static String DB_PASSWORD = "2FqqtStky1";
 
     private static Connection _connection;
+    private QueryMode queryMode;
     private String query;
 
-    public DatabaseBuilder(String query) {
+    public DatabaseBuilder(QueryMode queryMode, String query) {
         this.query = query;
+        this.queryMode = queryMode;
     }
 
     public static Connection getInstance() {
@@ -41,7 +38,7 @@ public class DatabaseBuilder {
         return _connection;
     }
 
-    public void execute(IDatabaseBuilder iDatabaseBuilder) {
-        new QueryTask(query, iDatabaseBuilder).execute();
+    public void execute(OnDatabaseBuilderQueryExecuteListener onDatabaseBuilderQueryExecuteListener) {
+        new QueryTask(queryMode, query, onDatabaseBuilderQueryExecuteListener).execute();
     }
 }

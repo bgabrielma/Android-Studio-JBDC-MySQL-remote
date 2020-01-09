@@ -1,36 +1,46 @@
 package com.example.a1008.test.Tasks;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
+import com.example.a1008.test.Helper.OnDatabaseBuilderQueryExecuteListener;
 import com.example.a1008.test.Helper.DatabaseBuilder;
-import com.example.a1008.test.Helper.IDatabaseBuilder;
+import com.example.a1008.test.Helper.QueryMode;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.SQLException;
 
 public class QueryTask extends AsyncTask<Void, Void, Void> {
 
     private String query;
-    private ResultSet resultSet;
-    private IDatabaseBuilder iDatabaseBuilder;
+    private QueryMode queryMode;
+    private Object result;
 
-    public QueryTask(String query, IDatabaseBuilder iDatabaseBuilder) {
+    private OnDatabaseBuilderQueryExecuteListener onDatabaseBuilderQueryExecuteListener;
+
+    public QueryTask(QueryMode queryMode, String query, OnDatabaseBuilderQueryExecuteListener onDatabaseBuilderQueryExecuteListener) {
+        this.queryMode = queryMode;
         this.query = query;
-        this.iDatabaseBuilder = iDatabaseBuilder;
+        this.onDatabaseBuilderQueryExecuteListener = onDatabaseBuilderQueryExecuteListener;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-
         Connection connection = DatabaseBuilder.getInstance();
 
         if (connection != null) {
             try {
                 Statement statement = connection.createStatement();
-                resultSet = statement.executeQuery(query);
+
+                switch (queryMode) {
+                    case READ: {
+                        result = statement.executeQuery(query);
+                        break;
+                    }
+                    case WRITE: {
+                        result = statement.executeUpdate(query);
+                    }
+                }
             }
             catch (SQLException ex) {
                 throw new Error(ex.getMessage());
@@ -43,6 +53,6 @@ public class QueryTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        iDatabaseBuilder.OnDatabaseResultHandler(resultSet);
+        onDatabaseBuilderQueryExecuteListener.OnGetResultHandler(result);
     }
 }

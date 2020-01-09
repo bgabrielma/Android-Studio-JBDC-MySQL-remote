@@ -5,13 +5,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ListView;
 
 import com.example.a1008.test.Helper.DatabaseBuilder;
-import com.example.a1008.test.Helper.IDatabaseBuilder;
+import com.example.a1008.test.Helper.OnDatabaseBuilderQueryExecuteListener;
+import com.example.a1008.test.Helper.QueryMode;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,19 +26,49 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                DatabaseBuilder queryAllUsers = new DatabaseBuilder(QueryMode.WRITE,
+                        "DELETE FROM Users WHERE id = 3");
 
-                DatabaseBuilder queryAllUsers = new DatabaseBuilder("SELECT * FROM Users");
-                queryAllUsers.execute(new IDatabaseBuilder() {
+                queryAllUsers.execute(new OnDatabaseBuilderQueryExecuteListener() {
                     @Override
-                    public void OnDatabaseResultHandler(ResultSet resultSet) {
-                        try {
-                            while (resultSet.next()) {
-                                Log.d("Campo user", resultSet.getString("user"));
-                                Log.d("Campo email", resultSet.getString("email"));
-                            }
-                        } catch(SQLException ex) {
-                            ex.printStackTrace();
-                        }
+                    public void OnGetResultHandler(Object resultSet) {
+                        /**
+                         *
+                         *  Cast resultSet to { ResultSet } if QueryMode == QueryMode.READ
+                         *  Cast resultSet to { Integer } if QueryMode == QueryMode.WRITE
+                         *
+                         *  Cast example:
+                         *   ResultSet result = (ResultSet) resultSet;
+                         *   Integer rowsAffected = (Integer) resultSet;
+                         *
+                         *  Verify if Update, Delete or Insert were successful. For that, just check if length of rowsAffected > 0
+                         *
+                         *
+                         *  Retrieve data from ResultSet Object
+                         *
+                         *      --- Single row example ---
+                         *      String username, email;
+                         *         while(resultSet.next()) {
+                         *             username = resultSet("user") --> "user" is the name of column.
+                         *             email = resultSet("email") --> "email" is the name of column.
+                         *         }
+                         *
+                         *
+                         *
+                         *      --- Rows example ---
+                         *      List<User> users = new ArrayList<>();
+                         *
+                         *         while(resultSet.next()) {
+                         *
+                         *              User _user = new User();
+                         *              user.setUsername(resultSet("user")); --> "user" is the name of column.
+                         *              user.setEmail(resultSet("email")); --> "email" is the name of column.
+                         *
+                         *              users.add(_user);
+                         *         }
+                         */
+
+                        Log.d("ResultSet", resultSet.toString()); // ignore this
                     }
                 });
             }
